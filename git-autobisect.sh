@@ -18,3 +18,32 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "" ]; then
   usage
   exit 0
 fi
+
+# stop if current commit is ok
+$($@) && (echo "current commit is not broken" && exit 1)
+
+# save current as $bad
+bad=$(git log --pretty=format:'%h' | head -1)
+
+# find the first good commit
+commits=$(git log --pretty=format:'%h' | tail -n +2) # all but current commit
+
+for commit in $commits
+do
+  echo Now trying $commit
+  git checkout $commit
+  $($@) && good=$commit
+done
+
+# bisect if we found a good commit
+if [ "$good" != "" ]; then
+  git bisect start
+  git checkout $bad
+  git bisect bad
+  git checkout $good
+  git bisect good
+  git bisect run $@
+else
+  # otherwise give up
+  echo "no commit works" && exit 1
+fi

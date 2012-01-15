@@ -1,12 +1,19 @@
+ROOT = File.expand_path('../../', __FILE__)
+
 describe "git-autobisect" do
-  def run(command)
-    result = `#{command}`
-    raise "FAILED #{result} [#{command}]" unless $?.success?
+  def run(command, options={})
+    result = `#{command} 2>&1`
+    message = (options[:fail] ? "SUCCESS BUT SHOULD FAIL" : "FAIL")
+    raise "[#{message}] #{result} [#{command}]" if $?.success? == !!options[:fail]
     result
   end
 
-  def autobisect(args)
-    run "./git-autobisect.sh #{args}"
+  def autobisect(args, options={})
+    run "#{ROOT}/git-autobisect.sh #{args}", options
+  end
+
+  before do
+    Dir.chdir ROOT
   end
 
   describe "basics" do
@@ -32,6 +39,35 @@ describe "git-autobisect" do
   end
 
   describe "bisecting" do
-    
+    before do
+      run "rm -rf spec/tmp ; mkdir spec/tmp"
+      Dir.chdir "spec/tmp"
+      run "git init && touch a && git add a && git commit -m 'added a'"
+    end
+
+    it "stops when the first commit works" do
+      autobisect("test 1", :fail => true).should include("current commit is not broken")
+    end
+
+    it "stops when no commit works" do
+      autobisect("test", :fail => true).should include("no commit works")
+    end
+
+    it "finds the first broken commit for 1 commit" do
+      run "git rm a && git commit -m 'remove a'"
+      result = autobisect("test -e a")
+      result.should include("bisect run success")
+      result.should include("is the first bad commit")
+      result.should include("remove a")
+    end
+
+    it "finds the first broken commit for n commits" do
+      run "touch b && git add b && git commit -m 'added b'"
+      run "git rm a && git commit -m 'remove a'"
+      result = autobisect("test -e a")
+      result.should include("bisect run success")
+      result.should include("is the first bad commit")
+      result.should include("remove a")
+    end
   end
 end
