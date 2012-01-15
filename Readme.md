@@ -1,26 +1,37 @@
-Find the broken commit without having to learn git bisect
+Find the first broken commit without having to learn git bisect
 
 Install
 =======
 
-    install git
-    TO=/usr/local/bin/git-autobisect && curl https://raw.github.com/grosser/git-autobisect > $TO && chmod +x $TO
+    TO=/usr/local/bin/git-autobisect
+    curl https://raw.github.com/grosser/git-autobisect > $TO
+    chmod +x $TO
 
 Usage
 =====
 
     cd your project
-    git-autobisect rspec spec/models/user_spec.rb:12
+    # run a test that has a non-0 exit status
+    git-autobisect rspec spec/models/user_spec.rb
     ... grab a coffee ...
-    -> The first bad commit is a4328fa
+    ---> The first bad commit is a4328fa
 
-Test
+    git checkout a4328fa
+    git blame spec/models/user_spec.rb
+
+TODO
+====
+ - always checkout the first bad commit
+ - --step option that lets you skip multiple commits when searching for a very old problem
+ - option to square step on each successful test (skip 1 2 4 8 ... commits)
+
+
+Test / Development
 ====
 
     clone the repo
-    install git + ruby + rspec
+    install ruby + rspec
     rspec spec
-
 
 Author
 ======
