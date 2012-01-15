@@ -6,7 +6,15 @@ version() {
 }
 
 usage(){
-  echo "Usage"
+  echo "Find the first broken commit without having to learn git bisect
+
+Usage:
+    git-autobisect command-with-non-0-exit-status
+
+Options:
+    -v, --version                    Show Version
+    -h, --help                       Show this.
+"
 }
 
 if [ "$1" = "-v" ] || [ "$1" = "--version" ]; then
