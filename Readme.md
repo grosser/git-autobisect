@@ -2,8 +2,9 @@ Find the broken commit without having to learn git bisect
 
 Install
 =======
-    curl https://raw.github.com/grosser/git-autobisect > /usr/local/bin/git-autobisect
-    chmod +x /usr/local/bin/git-autobisect
+
+    install git
+    TO=/usr/local/bin/git-autobisect && curl https://raw.github.com/grosser/git-autobisect > $TO && chmod +x $TO
 
 Usage
 =====
