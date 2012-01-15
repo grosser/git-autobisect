@@ -3,8 +3,9 @@ Find the first broken commit without having to learn git bisect
 Install
 =======
 
+    sudo su # or use a location you do not need sudo for ...
     TO=/usr/local/bin/git-autobisect
-    curl https://raw.github.com/grosser/git-autobisect > $TO
+    curl https://raw.github.com/grosser/git-autobisect/master/git-autobisect.sh > $TO
     chmod +x $TO
 
 Usage
@@ -29,7 +30,7 @@ TODO
 Test / Development
 ====
 
-    clone the repo
+    git clone git://github.com/grosser/git-autobisect.git
     install ruby + rspec
     rspec spec
 
