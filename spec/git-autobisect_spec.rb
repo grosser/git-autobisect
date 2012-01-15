@@ -12,6 +12,10 @@ describe "git-autobisect" do
     run "#{ROOT}/git-autobisect.sh #{args}", options
   end
 
+  def current_commit
+    run "git log --oneline | head -1"
+  end
+
   before do
     Dir.chdir ROOT
   end
@@ -57,17 +61,25 @@ describe "git-autobisect" do
       run "git rm a && git commit -m 'remove a'"
       result = autobisect("test -e a")
       result.should include("bisect run success")
-      result.should include("is the first bad commit")
-      result.should include("remove a")
+      result.should =~ /is the first bad commit.*remove a/m
+    end
+
+    it "stays at the first broken commit" do
+      run "git rm a && git commit -m 'remove a'"
+      autobisect("test -e a")
+      pending "git bisect randomly stops at a commit" do
+        current_commit.should include("remove a")
+      end
     end
 
     it "finds the first broken commit for n commits" do
-      run "touch b && git add b && git commit -m 'added b'"
       run "git rm a && git commit -m 'remove a'"
+      run "touch b && git add b && git commit -m 'added b'"
+      run "touch c && git add c && git commit -m 'added c'"
       result = autobisect("test -e a")
       result.should include("bisect run success")
-      result.should include("is the first bad commit")
-      result.should include("remove a")
+      result.should =~ /is the first bad commit.*remove a/m
+      current_commit.should include("remove a")
     end
   end
 end
