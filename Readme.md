@@ -22,6 +22,7 @@ Usage
 
 TODO
 ====
+ - support complex commands like 'sleep 0.1 && test -e a'
  - always checkout the first bad commit
  - --step option that lets you skip multiple commits when searching for a very old problem
  - option to square step on each successful test (skip 1 2 4 8 ... commits)
