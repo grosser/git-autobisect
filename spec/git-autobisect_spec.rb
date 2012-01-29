@@ -71,6 +71,25 @@ describe "git-autobisect" do
       result.should =~ /is the first bad commit.*remove a/m
     end
 
+    xit "is fast for a large number of commits" do
+      # build a ton of commits
+      100.times do |i|
+        run "echo #{i} > a && git commit -am 'step #{i}'"
+      end
+      run "git rm a && git commit -m 'remove a'"
+      20.times do |i|
+        run "echo #{i} > b && git add b && git commit -am 'step #{i} after'"
+      end
+
+      # ran successful ?
+      result = autobisect("'echo a >> count && test -e a'")
+      result.should include("bisect run success")
+      result.should =~ /is the first bad commit.*remove a/m
+
+      # ran fast?
+      File.read('count').count('a').should < 20
+    end
+
     it "stays at the first broken commit" do
       run "git rm a && git commit -m 'remove a'"
       autobisect("test -e a")
