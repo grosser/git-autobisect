@@ -65,12 +65,10 @@ describe "git-autobisect" do
     end
 
     it "can run a complex command" do
-      pending do
-        run "git rm a && git commit -m 'remove a'"
-        result = autobisect("'sleep 0.1 && test -e a'")
-        result.should include("bisect run success")
-        result.should =~ /is the first bad commit.*remove a/m
-      end
+      run "git rm a && git commit -m 'remove a'"
+      result = autobisect("'sleep 0.01 && test -e a'")
+      result.should include("bisect run success")
+      result.should =~ /is the first bad commit.*remove a/m
     end
 
     it "stays at the first broken commit" do

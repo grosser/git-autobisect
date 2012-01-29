@@ -28,7 +28,7 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ "$1" = "" ]; then
 fi
 
 # stop if current commit is ok
-$($@) && (echo "current commit is not broken" && exit 1)
+eval "$@" && (echo "current commit is not broken" && exit 1)
 
 # save current as $bad
 bad=$(git log --pretty=format:'%h' | head -1)
@@ -40,7 +40,7 @@ for commit in $commits
 do
   echo Now trying $commit
   git checkout $commit
-  $($@) && good=$commit
+  eval "$@" && good=$commit
 done
 
 # bisect if we found a good commit
@@ -50,7 +50,7 @@ if [ "$good" != "" ]; then
   git bisect bad
   git checkout $good
   git bisect good
-  git bisect run $@
+  git bisect run eval "$@"
 else
   # otherwise give up
   echo "no commit works" && exit 1
