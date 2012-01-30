@@ -16,6 +16,14 @@ describe "git-autobisect" do
     run "git log --oneline | head -1"
   end
 
+  def add_irrelevant_commit(name)
+    run "touch #{name} && git add #{name} && git commit -m 'added #{name}'"
+  end
+
+  def remove_a
+    run "git rm a && git commit -m 'remove a'"
+  end
+
   before do
     Dir.chdir ROOT
   end
@@ -58,14 +66,14 @@ describe "git-autobisect" do
     end
 
     it "finds the first broken commit for 1 commit" do
-      run "git rm a && git commit -m 'remove a'"
+      remove_a
       result = autobisect("test -e a")
       result.should include("bisect run success")
       result.should =~ /is the first bad commit.*remove a/m
     end
 
     it "can run a complex command" do
-      run "git rm a && git commit -m 'remove a'"
+      remove_a
       result = autobisect("'sleep 0.01 && test -e a'")
       result.should include("bisect run success")
       result.should =~ /is the first bad commit.*remove a/m
@@ -74,11 +82,11 @@ describe "git-autobisect" do
     xit "is fast for a large number of commits" do
       # build a ton of commits
       100.times do |i|
-        run "echo #{i} > a && git commit -am 'step #{i}'"
+        add_irrelevant_commit(i)
       end
       run "git rm a && git commit -m 'remove a'"
       20.times do |i|
-        run "echo #{i} > b && git add b && git commit -am 'step #{i} after'"
+        add_irrelevant_commit("#{i}_2")
       end
 
       # ran successful ?
@@ -91,21 +99,38 @@ describe "git-autobisect" do
     end
 
     it "stays at the first broken commit" do
-      run "git rm a && git commit -m 'remove a'"
+      remove_a
       autobisect("test -e a")
       pending "git bisect randomly stops at a commit" do
         current_commit.should include("remove a")
       end
     end
 
-    it "finds the first broken commit for n commits" do
-      run "git rm a && git commit -m 'remove a'"
-      run "touch b && git add b && git commit -m 'added b'"
-      run "touch c && git add c && git commit -m 'added c'"
-      result = autobisect("test -e a")
-      result.should include("bisect run success")
-      result.should =~ /is the first bad commit.*remove a/m
-      current_commit.should include("remove a")
+    context "with multiple good commits after broken commit" do
+      before do
+        add_irrelevant_commit "b"
+        add_irrelevant_commit "c"
+        add_irrelevant_commit "d"
+        add_irrelevant_commit "e" # first good
+        remove_a
+        add_irrelevant_commit "f" # last bad
+        add_irrelevant_commit "g"
+      end
+
+      it "finds the first broken commit for n commits" do
+        result = autobisect("test -e a")
+        result.should include("bisect run success")
+        result.should =~ /is the first bad commit.*remove a/m
+        current_commit.should include("remove a")
+      end
+
+      it "does not run test too often" do
+        result = autobisect("'echo a >> count && test -e a'")
+        result.should include("bisect run success")
+        result.should include("added e")
+        result.should_not include("added d")
+        File.read('count').count('a').should == 6
+      end
     end
   end
 end

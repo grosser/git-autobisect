@@ -41,6 +41,7 @@ do
   echo Now trying $commit
   git checkout $commit
   eval "$@" && good=$commit
+  if [ "$good" != "" ]; then break; fi
 done
 
 # bisect if we found a good commit
