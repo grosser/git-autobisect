@@ -30,8 +30,8 @@ fi
 # stop if current commit is ok
 eval "$@" && (echo "current commit is not broken" && exit 1)
 
-# save current as $bad
-bad=$(git log --pretty=format:'%h' | head -1)
+# save current
+commit=$(git log --pretty=format:'%h' | head -1)
 
 # get all the commits we are interested in (max, without current)
 max_commits=10000
@@ -43,6 +43,9 @@ number_of_commits=${#commits[@]}
 i=0
 offset=0
 while [ "$good" == "" ]; do
+  # last commit did not work
+  bad=$commit
+
   # pick next commit
   let i=i+1
   let offset=(i-1)*10 || test 1
