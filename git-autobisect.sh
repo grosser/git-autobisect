@@ -35,14 +35,26 @@ bad=$(git log --pretty=format:'%h' | head -1)
 
 # find the first good commit
 commits=$(git log --pretty=format:'%h' | tail -n +2) # all but current commit
+commits=(${commits// / }) # split string into array
 
-for commit in $commits
-do
+number_of_commits=${#commits[@]}
+
+i=0
+offset=0
+while [ "$good" == "" ]; do
+  # pick next commit
+  let i=i+1
+  let offset=(i-1)*10 || test 1
+  commit=${commits[offset]}
+  if [ "$commit" == "" ]; then break; fi
+
+  # see if it works
   echo Now trying $commit
   git checkout $commit
   eval "$@" && good=$commit
-  if [ "$good" != "" ]; then break; fi
 done
+
+echo "DONE"
 
 # bisect if we found a good commit
 if [ "$good" != "" ]; then

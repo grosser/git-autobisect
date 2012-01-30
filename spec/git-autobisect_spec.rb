@@ -79,14 +79,14 @@ describe "git-autobisect" do
       result.should =~ /is the first bad commit.*remove a/m
     end
 
-    xit "is fast for a large number of commits" do
+    it "is fast for a large number of commits" do
       # build a ton of commits
-      100.times do |i|
-        add_irrelevant_commit(i)
+      40.times do |i|
+        add_irrelevant_commit("#{i}_good")
       end
       run "git rm a && git commit -m 'remove a'"
-      20.times do |i|
-        add_irrelevant_commit("#{i}_2")
+      40.times do |i|
+        add_irrelevant_commit("#{i}_bad")
       end
 
       # ran successful ?
