@@ -42,13 +42,19 @@ number_of_commits=${#commits[@]}
 # scan backwards through commits to find a good
 i=0
 offset=0
+stay_slow_until=3
 while [ "$good" == "" ]; do
   # last commit did not work
   bad=$commit
 
-  # pick next commit
+  # pick next commit (start slow, then get faster)
   let i=i+1
-  let offset=(i-1)*10 || test 1
+  if [ $i -lt $stay_slow_until ]; then
+    let offset=(i-1) || test 1
+  else
+    let offset=(i-1)*10 || test 1
+  fi
+
   commit=${commits[offset]}
   if [ "$commit" == "" ]; then break; fi
 
