@@ -33,10 +33,10 @@ eval "$@" && (echo "current commit is not broken" && exit 1)
 # save current as $bad
 bad=$(git log --pretty=format:'%h' | head -1)
 
-# find the first good commit
-commits=$(git log --pretty=format:'%h' | tail -n +2) # all but current commit
+# get all the commits we are interested in (max, without current)
+max_commits=10000
+commits=$(git log --pretty=format:'%h' | tail -n +2 | head -n$max_commits)
 commits=(${commits// / }) # split string into array
-
 number_of_commits=${#commits[@]}
 
 i=0
