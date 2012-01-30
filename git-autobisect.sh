@@ -39,6 +39,7 @@ commits=$(git log --pretty=format:'%h' | tail -n +2 | head -n$max_commits)
 commits=(${commits// / }) # split string into array
 number_of_commits=${#commits[@]}
 
+# scan backwards through commits to find a good
 i=0
 offset=0
 while [ "$good" == "" ]; do
@@ -54,9 +55,7 @@ while [ "$good" == "" ]; do
   eval "$@" && good=$commit
 done
 
-echo "DONE"
-
-# bisect if we found a good commit
+# bisect to get exact match
 if [ "$good" != "" ]; then
   git bisect start
   git checkout $bad
