@@ -23,6 +23,8 @@ TODO
 ====
  - go with 1 2 4 8 16 16 16 16 commits back
  - option for max-step -> if you think the problem is very fresh/very old
+ - option to disable `bundle check || bundle` injection
+ - option to consider a build failed if it finishes faster then x seconds
 
 Development
 ===========
