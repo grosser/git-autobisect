@@ -1,39 +1,33 @@
-Find the first broken commit without having to learn git bisect
+Find the first broken commit without having to learn git bisect.
+
+ - automagically bundles if necessary
+ - stops at first bad commit
+ - starts slow (HEAD~1, HEAD~2, HEAD~3) then goes in steps of 10 (..., HEAD~10, HEAD~20, HEAD~30)
 
 Install
 =======
 
-    sudo su # or use a location you do not need sudo for ...
-    TO=/usr/local/bin/git-autobisect
-    curl https://raw.github.com/grosser/git-autobisect/master/git-autobisect.sh > $TO
-    chmod +x $TO
+    gem install git-autobisect
 
 Usage
 =====
 
     cd your project
     # run a test that has a non-0 exit status
-    git-autobisect rspec spec/models/user_spec.rb
+    git-autobisect 'rspec spec/models/user_spec.rb'
     ... grab a coffee ...
     ---> The first bad commit is a4328fa
-
-    git checkout a4328fa
-    git blame spec/models/user_spec.rb
+    git show
 
 TODO
 ====
- - support complex commands like 'sleep 0.1 && test -e a'
- - always checkout the first bad commit
  - go with 1 2 4 8 16 16 16 16 commits back
  - option for max-step -> if you think the problem is very fresh/very old
 
-
-Test / Development
-====
-
-    git clone git://github.com/grosser/git-autobisect.git
-    install ruby + rspec
-    rspec spec
+Development
+===========
+ - `bundle && bundle exec rake`
+ - Tests run a lot faster without `bundle exec`
 
 Author
 ======

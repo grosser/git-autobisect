@@ -13,7 +13,10 @@ Usage:
 Options:
 BANNER
   opts.on("-h", "--help","Show this.") { puts opts; exit }
-  opts.on("-v", "--version","Show Version"){ puts "git-autobisect 0.1.0"; exit}
+  opts.on("-v", "--version","Show Version"){
+    version = File.read(File.expand_path("../../VERSION", __FILE__))
+    puts "git-autobisect #{version}"; exit
+  }
 end.parse!
 
 command = ARGV.first
