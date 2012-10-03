@@ -1,0 +1,91 @@
+#! /usr/bin/env ruby
+
+require 'rubygems'
+require 'optparse'
+
+OptionParser.new do |opts|
+  opts.banner = <<BANNER
+Find the commit that broke the build
+
+Usage:
+    git-autobisect 'ruby test/foo_test.rb -n "/xxx/"' [options]
+
+Options:
+BANNER
+  opts.on("-h", "--help","Show this.") { puts opts; exit }
+  opts.on("-v", "--version","Show Version"){ puts "git-autobisect 0.1.0"; exit}
+end.parse!
+
+command = ARGV.first
+if command.to_s.empty?
+  puts "Usage instructions: git-autobisect --help"
+  exit
+end
+
+def run(cmd)
+  all = ""
+  puts cmd
+  IO.popen(cmd) do |pipe|
+    while str = pipe.gets
+      all << str
+      puts str
+    end
+  end
+  [$?.success?, all]
+end
+
+def run!(command)
+  raise "Command failed #{command}" unless run(command).first
+end
+
+def find_first_good_commit(commits, command)
+  # scan backwards through commits to find a good
+  i = 0
+  stay_slow_until = 3
+
+  loop do
+    # pick next commit (start slow, then get faster)
+    i += 1
+    offset = (i <= stay_slow_until ? i-1 : (i-1)*10)
+    break unless commit = commits[offset]
+
+    # see if it works
+    puts " ---> Now trying #{commit}"
+    run!("git checkout #{commit}")
+    return commit if run(command).first
+  end
+end
+
+command = "(bundle check || bundle) && (#{command})" if File.exist?("Gemfile")
+puts " ---> Initial run:"
+if run(command).first
+  puts " ---> Current commit is not broken"
+  exit 1
+end
+
+puts " ---> Trying to find first good commit:"
+max_commits = 1000
+commits = `git log --pretty=format:'%h' | head -n #{max_commits}`.split("\n")
+unless good = find_first_good_commit(commits[1..-1], command)
+  puts " --> No good commit found"
+  exit 1
+end
+
+# bisect to get exact match
+bad = commits[0]
+run! "git bisect reset"
+run! "git bisect start"
+run! "git checkout #{bad}"
+run! "git bisect bad"
+run! "git checkout #{good}"
+run! "git bisect good"
+success, output = run("git bisect run sh -c '#{command}'")
+if success
+  # git bisect randomly stops at a commit
+  first_bad = output.match(/([\da-f]+) is the first bad commit/)[1]
+  run! "git checkout #{first_bad}"
+  exit 0
+else
+  exit 1
+end
+

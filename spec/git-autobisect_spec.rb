@@ -9,7 +9,7 @@ describe "git-autobisect" do
   end
 
   def autobisect(args, options={})
-    run "#{ROOT}/git-autobisect.sh #{args}", options
+    run "#{ROOT}/bin/git-autobisect #{args}", options
   end
 
   def current_commit
@@ -58,16 +58,16 @@ describe "git-autobisect" do
     end
 
     it "stops when the first commit works" do
-      autobisect("test 1", :fail => true).should include("current commit is not broken")
+      autobisect("'test 1'", :fail => true).should include("Current commit is not broken")
     end
 
     it "stops when no commit works" do
-      autobisect("test", :fail => true).should include("no commit works")
+      autobisect("test", :fail => true).should include("No good commit found")
     end
 
     it "finds the first broken commit for 1 commit" do
       remove_a
-      result = autobisect("test -e a")
+      result = autobisect("'test -e a'")
       result.should include("bisect run success")
       result.should =~ /is the first bad commit.*remove a/m
     end
@@ -100,10 +100,8 @@ describe "git-autobisect" do
 
     it "stays at the first broken commit" do
       remove_a
-      autobisect("test -e a")
-      pending "git bisect randomly stops at a commit" do
-        current_commit.should include("remove a")
-      end
+      autobisect("'test -e a'")
+      current_commit.should include("remove a")
     end
 
     context "with multiple good commits after broken commit" do
@@ -118,7 +116,7 @@ describe "git-autobisect" do
       end
 
       it "finds the first broken commit for n commits" do
-        result = autobisect("test -e a")
+        result = autobisect("'test -e a'")
         result.should include("bisect run success")
         result.should =~ /is the first bad commit.*remove a/m
         current_commit.should include("remove a")
