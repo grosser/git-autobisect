@@ -8,5 +8,6 @@ Gem::Specification.new name, version do |s|
   s.email = "michael@grosser.it"
   s.homepage = "http://github.com/grosser/#{name}"
   s.files = `git ls-files`.split("\n")
+  s.executables = ["git-autobisect"]
   s.license = "MIT"
 end
