@@ -16,8 +16,8 @@ describe "git-autobisect" do
     run "git log --oneline | head -1"
   end
 
-  def add_irrelevant_commit(name)
-    run "touch #{name} && git add #{name} && git commit -m 'added #{name}'"
+  def add_irrelevant_commit(name="b")
+    run "echo #{rand} >> #{name} && git add #{name} && git commit -m 'added #{name}'"
   end
 
   def remove_a
@@ -68,12 +68,21 @@ describe "git-autobisect" do
     it "finds the first broken commit for 1 commit" do
       remove_a
       result = autobisect("'test -e a'")
-      result.should include("bisect run success")
+      result.should_not include("bisect run")
+      result.should =~ /is the first bad commit.*remove a/m
+    end
+
+    it "finds the first broken commit for multiple commits" do
+      remove_a
+      result = autobisect("'test -e a'")
+      result.should_not include("bisect run success")
       result.should =~ /is the first bad commit.*remove a/m
     end
 
     it "can run a complex command" do
+      10.times{ add_irrelevant_commit }
       remove_a
+      10.times{ add_irrelevant_commit }
       result = autobisect("'sleep 0.01 && test -e a'")
       result.should include("bisect run success")
       result.should =~ /is the first bad commit.*remove a/m
@@ -126,7 +135,6 @@ describe "git-autobisect" do
         result = autobisect("'echo a >> count && test -e a'")
         result.should include("bisect run success")
         result.should include("added e")
-        result.should_not include("added d")
         File.read('count').count('a').should == 6
       end
     end

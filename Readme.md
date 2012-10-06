@@ -2,7 +2,7 @@ Find the first broken commit without having to learn git bisect.
 
  - automagically bundles if necessary
  - stops at first bad commit
- - starts slow (HEAD~1, HEAD~2, HEAD~3) then goes in steps of 10 (..., HEAD~10, HEAD~20, HEAD~30)
+ - takes binary steps (HEAD~1, HEAD~2, HEAD~4, HEAD~8)
 
 Install
 =======
@@ -21,7 +21,6 @@ Usage
 
 TODO
 ====
- - go with 1 2 4 8 16 16 16 16 commits back
  - option for max-step -> if you think the problem is very fresh/very old
  - option to disable `bundle check || bundle` injection
  - option to consider a build failed if it finishes faster then x seconds

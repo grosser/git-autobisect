@@ -44,21 +44,20 @@ end
 def find_first_good_commit(commits, command)
   # scan backwards through commits to find a good
   i = 0
-  stay_slow_until = 3
 
   loop do
-    # pick next commit (start slow, then get faster)
-    i += 1
-    offset = (i <= stay_slow_until ? i-1 : (i-1)*10)
-    break unless commit = commits[offset]
+    offset = (2**i) - 1
+    maybe_good, bad = commits[offset], maybe_good
+    return unless maybe_good
 
     # see if it works
-    puts " ---> Now trying #{commit}"
-    run!("git checkout #{commit}")
-    return commit if run(command).first
+    puts " ---> Now trying #{maybe_good} (HEAD~#{offset + 1})"
+    run!("git checkout #{maybe_good}")
+    return [maybe_good, bad] if run(command).first
+    i += 1
   end
 end
-
+run "git l"
 command = "(bundle check || bundle) && (#{command})" if File.exist?("Gemfile")
 puts " ---> Initial run:"
 if run(command).first
@@ -69,26 +68,36 @@ end
 puts " ---> Trying to find first good commit:"
 max_commits = 1000
 commits = `git log --pretty=format:'%h' | head -n #{max_commits}`.split("\n")
-unless good = find_first_good_commit(commits[1..-1], command)
+good, bad = find_first_good_commit(commits[1..-1], command)
+bad ||= commits[0]
+unless good
   puts " --> No good commit found"
   exit 1
 end
 
-# bisect to get exact match
-bad = commits[0]
-run! "git bisect reset"
-run! "git bisect start"
-run! "git checkout #{bad}"
-run! "git bisect bad"
-run! "git checkout #{good}"
-run! "git bisect good"
-success, output = run("git bisect run sh -c '#{command}'")
-if success
-  # git bisect randomly stops at a commit
-  first_bad = output.match(/([\da-f]+) is the first bad commit/)[1]
-  run! "git checkout #{first_bad}"
-  exit 0
-else
-  exit 1
-end
+puts commits.index(good)
+puts commits.index(bad)
 
+if (commits.index(good) - commits.index(bad)).abs <= 1
+  # return same result as git bisect
+  run "git checkout #{bad}"
+  puts "#{bad} is the first bad commit"
+  puts `git show #{bad}`
+else
+  # bisect to get exact match
+  run! "git bisect reset"
+  run! "git bisect start"
+  run! "git checkout #{bad}"
+  run! "git bisect bad"
+  run! "git checkout #{good}"
+  run! "git bisect good"
+  success, output = run("git bisect run sh -c '#{command}'")
+  if success
+    # git bisect randomly stops at a commit
+    first_bad = output.match(/([\da-f]+) is the first bad commit/)[1]
+    run! "git checkout #{first_bad}"
+    exit 0
+  else
+    exit 1
+  end
+end
