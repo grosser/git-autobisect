@@ -30,7 +30,7 @@ describe "git-autobisect" do
 
   describe "basics" do
     it "shows its usage without arguments" do
-      autobisect("").should include("Usage")
+      autobisect("", :fail => true).should include("Usage")
     end
 
     it "shows its usage with -h" do
