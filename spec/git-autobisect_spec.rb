@@ -58,7 +58,7 @@ describe "git-autobisect" do
     end
 
     it "stops when the first commit works" do
-      autobisect("'test 1'", :fail => true).should include("Current commit is not broken")
+      autobisect("'test 1'", :fail => true).should include("HEAD is not broken")
     end
 
     it "stops when no commit works" do
@@ -135,7 +135,7 @@ describe "git-autobisect" do
         result = autobisect("'echo a >> count && test -e a'")
         result.should include("bisect run success")
         result.should include("added e")
-        File.read('count').count('a').should == 6
+        File.read('count').count('a').should == 5
       end
     end
   end

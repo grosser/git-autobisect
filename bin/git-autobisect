@@ -42,49 +42,23 @@ def run!(command)
 end
 
 def find_first_good_commit(commits, command)
-  # scan backwards through commits to find a good
   i = 0
 
   loop do
-    offset = (2**i) - 1
-    maybe_good, bad = commits[offset], maybe_good
+    # scan backwards through commits to find a good
+    offset = 2**i - 1
+    maybe_good, bad = commits[offset], (maybe_good || commits.first)
     return unless maybe_good
 
     # see if it works
-    puts " ---> Now trying #{maybe_good} (HEAD~#{offset + 1})"
+    puts " ---> Now trying #{maybe_good} (HEAD~#{offset})"
     run!("git checkout #{maybe_good}")
     return [maybe_good, bad] if run(command).first
     i += 1
   end
 end
-run "git l"
-command = "(bundle check || bundle) && (#{command})" if File.exist?("Gemfile")
-puts " ---> Initial run:"
-if run(command).first
-  puts " ---> Current commit is not broken"
-  exit 1
-end
 
-puts " ---> Trying to find first good commit:"
-max_commits = 1000
-commits = `git log --pretty=format:'%h' | head -n #{max_commits}`.split("\n")
-good, bad = find_first_good_commit(commits[1..-1], command)
-bad ||= commits[0]
-unless good
-  puts " --> No good commit found"
-  exit 1
-end
-
-puts commits.index(good)
-puts commits.index(bad)
-
-if (commits.index(good) - commits.index(bad)).abs <= 1
-  # return same result as git bisect
-  run "git checkout #{bad}"
-  puts "#{bad} is the first bad commit"
-  puts `git show #{bad}`
-else
-  # bisect to get exact match
+def bisect_to_exact_match(command, good, bad)
   run! "git bisect reset"
   run! "git bisect start"
   run! "git checkout #{bad}"
@@ -92,12 +66,33 @@ else
   run! "git checkout #{good}"
   run! "git bisect good"
   success, output = run("git bisect run sh -c '#{command}'")
-  if success
-    # git bisect randomly stops at a commit
-    first_bad = output.match(/([\da-f]+) is the first bad commit/)[1]
-    run! "git checkout #{first_bad}"
-    exit 0
-  else
-    exit 1
-  end
+  raise "error while bisecting" unless success
+  output.match(/([\da-f]+) is the first bad commit/)[1]
+end
+
+def exact_commit_known?(commits, good, bad)
+  (commits.index(good) - commits.index(bad)).abs <= 1
+end
+
+max_commits = 1000
+command = "(bundle check || bundle) && (#{command})" if File.exist?("Gemfile")
+commits = `git log --pretty=format:'%h' | head -n #{max_commits}`.split("\n")
+good, bad = find_first_good_commit(commits, command)
+
+if good == commits.first
+  puts " ---> HEAD is not broken"
+  exit 1
+elsif not good
+  puts " --> No good commit found"
+  exit 1
+end
+
+if exact_commit_known?(commits, good, bad)
+  # return same result as git bisect
+  run "git checkout #{bad}"
+  puts "#{bad} is the first bad commit"
+  puts `git show #{bad}`
+else
+  first_bad = bisect_to_exact_match(command, good, bad)
+  run! "git checkout #{first_bad}"
 end
