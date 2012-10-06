@@ -19,9 +19,13 @@ Usage
     ---> The first bad commit is a4328fa
     git show
 
+### Options
+
+    -m, --max [N]                    Inspect commits between HEAD..HEAD~<max>
+
 TODO
 ====
- - option for max-step -> if you think the problem is very fresh/very old
+ - option for max-step-size so you can use a finer grained approach
  - option to disable `bundle check || bundle` injection
  - option to consider a build failed if it finishes faster then x seconds
 

@@ -3,6 +3,9 @@
 require 'rubygems'
 require 'optparse'
 
+options = {
+  :max => 1000
+}
 OptionParser.new do |opts|
   opts.banner = <<BANNER
 Find the commit that broke the build
@@ -12,11 +15,12 @@ Usage:
 
 Options:
 BANNER
-  opts.on("-h", "--help","Show this.") { puts opts; exit }
-  opts.on("-v", "--version","Show Version"){
+  opts.on("-h", "--help", "Show this.") { puts opts; exit }
+  opts.on("-v", "--version", "Show Version"){
     version = File.read(File.expand_path("../../VERSION", __FILE__))
     puts "git-autobisect #{version}"; exit
   }
+  opts.on("-m", "--max [N]", Integer, "Inspect commits between HEAD..HEAD~<max>"){|max| options[:max] = max }
 end.parse!
 
 command = ARGV.first
@@ -43,12 +47,13 @@ end
 
 def find_first_good_commit(commits, command)
   i = 0
+  maybe_good = commits.first
 
   loop do
     # scan backwards through commits to find a good
-    offset = 2**i - 1
-    maybe_good, bad = commits[offset], (maybe_good || commits.first)
-    return unless maybe_good
+    offset = [2**i - 1, commits.size-1].min
+    maybe_good, bad = commits[offset], maybe_good
+    return if i > 0 and bad == maybe_good # we reached the end
 
     # see if it works
     puts " ---> Now trying #{maybe_good} (HEAD~#{offset})"
@@ -74,16 +79,15 @@ def exact_commit_known?(commits, good, bad)
   (commits.index(good) - commits.index(bad)).abs <= 1
 end
 
-max_commits = 1000
 command = "(bundle check || bundle) && (#{command})" if File.exist?("Gemfile")
-commits = `git log --pretty=format:'%h' | head -n #{max_commits}`.split("\n")
+commits = `git log --pretty=format:'%h' | head -n #{options[:max]}`.split("\n")
 good, bad = find_first_good_commit(commits, command)
 
 if good == commits.first
   puts " ---> HEAD is not broken"
   exit 1
 elsif not good
-  puts " --> No good commit found"
+  puts " ---> No good commit found before HEAD~#{options[:max]}"
   exit 1
 end
 

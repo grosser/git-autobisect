@@ -65,6 +65,22 @@ describe "git-autobisect" do
       autobisect("test", :fail => true).should include("No good commit found")
     end
 
+    context "--max" do
+      let(:command){ "'test -e a' --max 5" }
+
+      it "finds if a commit works inside of max range" do
+        remove_a
+        3.times{ add_irrelevant_commit }
+        autobisect(command).should_not include("No good commit found")
+      end
+
+      it "stops when no commit works inside of max range" do
+        remove_a
+        5.times{ add_irrelevant_commit }
+        autobisect(command, :fail => true).should include("No good commit found")
+      end
+    end
+
     it "finds the first broken commit for 1 commit" do
       remove_a
       result = autobisect("'test -e a'")
@@ -135,7 +151,7 @@ describe "git-autobisect" do
         result = autobisect("'echo a >> count && test -e a'")
         result.should include("bisect run success")
         result.should include("added e")
-        File.read('count').count('a').should == 5
+        File.read('count').count('a').should == 4
       end
     end
   end
