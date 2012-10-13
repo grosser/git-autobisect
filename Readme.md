@@ -22,6 +22,9 @@ Usage
 ### Options
 
     -m, --max [N]                    Inspect commits between HEAD..HEAD~<max>
+TIPS
+====
+ - do not fail if test file is missing `[ ! -f spec/my_spec.rb ] || rspec spec/my_spec.rb`
 
 TODO
 ====
