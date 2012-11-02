@@ -81,6 +81,17 @@ describe "git-autobisect" do
       end
     end
 
+    context "--start" do
+      let(:command){ "'test -e a' --start 5" }
+
+      it "starts at given point" do
+        remove_a
+        30.times{ add_irrelevant_commit }
+        result = autobisect(command)
+        result.scan(/HEAD~\d+/).should == ["HEAD~4", "HEAD~9", "HEAD~19", "HEAD~31"]
+      end
+    end
+
     it "finds the first broken commit for 1 commit" do
       remove_a
       result = autobisect("'test -e a'")

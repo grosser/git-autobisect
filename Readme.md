@@ -21,7 +21,9 @@ Usage
 
 ### Options
 
-    -m, --max [N]                    Inspect commits between HEAD..HEAD~<max>
+    -m, --max N                    Inspect commits between HEAD..HEAD~<max>
+    -s, --start N                  Use N (instead of 1) as initial step and keep muliplying by 2
+
 TIPS
 ====
  - do not fail if test file is missing `[ ! -f spec/my_spec.rb ] || rspec spec/my_spec.rb`

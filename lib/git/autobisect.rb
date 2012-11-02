@@ -19,7 +19,7 @@ module Git
 
       def run_command(command, options)
         commits = `git log --pretty=format:'%h' | head -n #{options[:max]}`.split("\n")
-        good, bad = find_good_and_bad_commit(commits, command)
+        good, bad = find_good_and_bad_commit(commits, command, options)
 
         if good == commits.first
           puts " ---> HEAD is not broken"
@@ -57,7 +57,8 @@ module Git
           BANNER
           opts.on("-h", "--help", "Show this.") { puts opts; exit }
           opts.on("-v", "--version", "Show Version"){ puts "git-autobisect #{Version}"; exit }
-          opts.on("-m", "--max [N]", Integer, "Inspect commits between HEAD..HEAD~<max>"){|max| options[:max] = max }
+          opts.on("-m", "--max N", Integer, "Inspect commits between HEAD..HEAD~<max>"){|max| options[:max] = max }
+          opts.on("-s", "--start N", Integer, "Use N (instead of 1) as initial step and keep muliplying by 2"){|start| options[:start] = start }
         end.parse!(argv)
         options
       end
@@ -78,21 +79,22 @@ module Git
         raise "Command failed #{command}" unless run(command).first
       end
 
-      def find_good_and_bad_commit(commits, command)
-        i = 0
+      def find_good_and_bad_commit(commits, command, options)
+        initial = 1
+        i = options[:start] || initial
         maybe_good = commits.first
 
         loop do
           # scan backwards through commits to find a good
-          offset = [2**i - 1, commits.size-1].min
+          offset = [i - 1, commits.size-1].min
           maybe_good, bad = commits[offset], maybe_good
-          return if i > 0 and bad == maybe_good # we reached the end
+          return if i > initial and bad == maybe_good # we reached the end
 
           # see if it works
           puts " ---> Now trying #{maybe_good} (HEAD~#{offset})"
           run!("git checkout #{maybe_good}")
           return [maybe_good, bad] if run(command).first
-          i += 1
+          i *= 2
         end
       end
 
