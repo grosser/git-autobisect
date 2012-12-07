@@ -100,11 +100,7 @@ module Git
 
       def bisect_to_exact_match(command, good, bad)
         run! "git bisect reset"
-        run! "git bisect start"
-        run! "git checkout #{bad}"
-        run! "git bisect bad"
-        run! "git checkout #{good}"
-        run! "git bisect good"
+        run! "git bisect start #{bad} #{good}"
         success, output = run("git bisect run sh -c '#{command}'")
         raise "error while bisecting" unless success
         output.match(/([\da-f]+) is the first bad commit/)[1]
