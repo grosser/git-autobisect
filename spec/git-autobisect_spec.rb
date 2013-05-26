@@ -24,10 +24,6 @@ describe "git-autobisect" do
     run "git rm a && git commit -m 'remove a'"
   end
 
-  before do
-    Dir.chdir ROOT
-  end
-
   describe "basics" do
     it "shows its usage without arguments" do
       autobisect("", :fail => true).should include("Usage")
@@ -51,10 +47,14 @@ describe "git-autobisect" do
   end
 
   describe "bisecting" do
-    before do
-      run "rm -rf spec/tmp ; mkdir spec/tmp"
-      Dir.chdir "spec/tmp"
-      run "git init && touch a && git add a && git commit -m 'added a'"
+    around do |example|
+      dir = "spec/tmp"
+      run "rm -rf #{dir} ; mkdir #{dir}"
+      Dir.chdir dir do
+        run "git init && touch a && git add a && git commit -m 'added a'"
+        example.call
+      end
+      run "rm -rf #{dir}"
     end
 
     it "stops when the first commit works" do
