@@ -7,7 +7,7 @@ Gem::Specification.new name, Git::Autobisect::Version do |s|
   s.authors = ["Michael Grosser"]
   s.email = "michael@grosser.it"
   s.homepage = "http://github.com/grosser/#{name}"
-  s.files = `git ls-files`.split("\n")
+  s.files = `git ls-files lib/ bin/`.split("\n")
   s.executables = ["git-autobisect"]
   s.license = "MIT"
 end
