@@ -24,6 +24,10 @@ describe "git-autobisect" do
     run "git rm a && git commit -m 'remove a'"
   end
 
+  def write(file, content)
+    File.open(file, "w") { |f| f.write content }
+  end
+
   describe "basics" do
     it "shows its usage without arguments" do
       autobisect("", :fail => true).should include("Usage")
@@ -52,7 +56,7 @@ describe "git-autobisect" do
       run "rm -rf #{dir} ; mkdir #{dir}"
       Dir.chdir dir do
         run "git init && touch a && git add a && git commit -m 'added a'"
-        example.call
+        Bundler.with_clean_env(&example)
       end
       run "rm -rf #{dir}"
     end
@@ -89,6 +93,26 @@ describe "git-autobisect" do
         30.times{ add_irrelevant_commit }
         result = autobisect(command)
         result.scan(/HEAD~\d+/).should == ["HEAD~4", "HEAD~9", "HEAD~19", "HEAD~31"]
+      end
+    end
+
+    context "bundler" do
+      it "bundles when a Gemfile exists" do
+        write("test.rb", "gem 'rake', '0.9.2'\nputs 456")
+        write("Gemfile", "source 'https://rubygems.org'\ngem 'rake', '0.9.2'\nputs 123")
+        result = autobisect("'bundle exec ruby test.rb'", :fail => true)
+        result.should include("HEAD is not broken")
+        result.scan("123").count.should == 2
+        result.should include "bundle check"
+      end
+
+      it "bundles when a Gemfile exists" do
+        write("test.rb", "gem 'rake', '0.9.2'\nputs 456")
+        write("Gemfile", "source 'https://rubygems.org'\ngem 'rake', '0.9.2'\nputs 123")
+        result = autobisect("'bundle exec ruby test.rb'", :fail => true)
+        result.should include("HEAD is not broken")
+        result.scan("123").count.should == 2
+        result.should include "bundle check"
       end
     end
 
