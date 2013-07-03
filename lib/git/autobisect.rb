@@ -12,7 +12,7 @@ module Git
           return 1
         end
 
-        command = "(bundle check || bundle) && (#{command})" if File.exist?("Gemfile")
+        command = "(bundle check || (test -f vendor/cache && bundle --local --quiet) || bundle --quiet) && (#{command})" if File.exist?("Gemfile")
 
         run_command(command, options) || 0
       end

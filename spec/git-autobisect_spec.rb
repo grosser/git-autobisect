@@ -105,15 +105,6 @@ describe "git-autobisect" do
         result.scan("123").count.should == 2
         result.should include "bundle check"
       end
-
-      it "bundles when a Gemfile exists" do
-        write("test.rb", "gem 'rake', '0.9.2'\nputs 456")
-        write("Gemfile", "source 'https://rubygems.org'\ngem 'rake', '0.9.2'\nputs 123")
-        result = autobisect("'bundle exec ruby test.rb'", :fail => true)
-        result.should include("HEAD is not broken")
-        result.scan("123").count.should == 2
-        result.should include "bundle check"
-      end
     end
 
     it "finds the first broken commit for 1 commit" do
