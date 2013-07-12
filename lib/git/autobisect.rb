@@ -12,7 +12,13 @@ module Git
           return 1
         end
 
-        command = "(bundle check || (test -f vendor/cache && bundle --local --quiet) || bundle --quiet) && (#{command})" if File.exist?("Gemfile")
+        # make sure bundle is fresh before each run
+        if File.exist?("Gemfile")
+          command = "(bundle check || (test -f vendor/cache && bundle --local --quiet) || bundle --quiet) && (#{command})"
+        end
+
+        # reset changes but keep the exit status
+        command += "; export X=$? ; git reset --hard ; exit $X"
 
         run_command(command, options) || 0
       end

@@ -155,6 +155,15 @@ describe "git-autobisect" do
       current_commit.should include("remove a")
     end
 
+    it "can run a complex command" do
+      10.times{ add_irrelevant_commit }
+      remove_a
+      10.times{ add_irrelevant_commit }
+      result = autobisect("'echo 1 > b && test -e a'")
+      result.should include("bisect run success")
+      result.should =~ /is the first bad commit.*remove a/m
+    end
+
     context "with multiple good commits after broken commit" do
       before do
         add_irrelevant_commit "b"
