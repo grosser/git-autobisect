@@ -1,5 +1,10 @@
 ROOT = File.expand_path('../../', __FILE__)
 
+RSpec.configure do |config|
+  config.expect_with(:rspec) { |c| c.syntax = :should }
+  config.mock_with(:rspec) { |c| c.syntax = :should }
+end
+
 describe "git-autobisect" do
   def run(command, options={})
     result = `#{command} 2>&1`
