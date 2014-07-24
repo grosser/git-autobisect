@@ -64,7 +64,8 @@ module Git
           opts.on("-h", "--help", "Show this.") { puts opts; exit }
           opts.on("-v", "--version", "Show Version"){ puts "git-autobisect #{Version}"; exit }
           opts.on("-m", "--max N", Integer, "Inspect commits between HEAD..HEAD~<max>"){|max| options[:max] = max }
-          opts.on("-s", "--start N", Integer, "Use N (instead of 1) as initial step and keep muliplying by 2"){|start| options[:start] = start }
+          opts.on("-s", "--start N", Integer, "Use N (instead of 1) as initial step and keep multiplying by 2"){|start| options[:start] = start }
+          opts.on("--step N", Integer, "Use N as step (instead of multiplying by 2)"){|step| options[:step] = step }
           opts.on("--no-bundle", "Do not bundle even if a Gemfile exists"){ options[:no_bundle] = true }
         end.parse!(argv)
         options
@@ -89,6 +90,7 @@ module Git
       def find_good_and_bad_commit(commits, command, options)
         initial = 1
         i = options[:start] || initial
+        step = options[:step]
         maybe_good = commits.first
 
         loop do
@@ -101,7 +103,7 @@ module Git
           puts " ---> Now trying #{maybe_good} (HEAD~#{offset})"
           run!("git checkout #{maybe_good}")
           return [maybe_good, bad] if run(command).first
-          i *= 2
+          step ? i += step : i *= 2
         end
       end
 

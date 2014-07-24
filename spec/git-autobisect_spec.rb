@@ -91,13 +91,20 @@ describe "git-autobisect" do
     end
 
     context "--start" do
-      let(:command){ "'test -e a' --start 5" }
-
       it "starts at given point" do
         remove_a
         30.times{ add_irrelevant_commit }
-        result = autobisect(command)
+        result = autobisect("'test -e a' --start 5")
         result.scan(/HEAD~\d+/).should == ["HEAD~4", "HEAD~9", "HEAD~19", "HEAD~31"]
+      end
+    end
+
+    context "--step" do
+      it "steps with given number" do
+        remove_a
+        10.times{ add_irrelevant_commit }
+        result = autobisect("'test -e a' --step 2")
+        result.scan(/HEAD~\d+/).should == ["HEAD~0", "HEAD~2", "HEAD~4", "HEAD~6", "HEAD~8", "HEAD~10", "HEAD~11"]
       end
     end
 
