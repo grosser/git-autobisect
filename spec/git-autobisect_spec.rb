@@ -101,14 +101,24 @@ describe "git-autobisect" do
       end
     end
 
-    context "bundler" do
-      it "bundles when a Gemfile exists" do
-        write("test.rb", "gem 'rake', '0.9.2'\nputs 456")
+    context "bundler with Gemfile" do
+      before do
         write("Gemfile", "source 'https://rubygems.org'\ngem 'rake', '0.9.2'\nputs 123")
+        write("test.rb", "gem 'rake', '0.9.2'\nputs 456")
+      end
+
+      it "bundles" do
         result = autobisect("'bundle exec ruby test.rb'", :fail => true)
         result.should include("HEAD is not broken")
         result.scan("123").count.should == 2
         result.should include "bundle check"
+      end
+
+      it "does not bundle with --no-bundle" do
+        result = autobisect("'bundle exec ruby test.rb' --no-bundle", :fail => true)
+        result.should include("HEAD is not broken")
+        result.scan("123").count.should == 1
+        result.should_not include "bundle check"
       end
     end
 

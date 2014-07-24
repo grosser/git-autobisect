@@ -13,7 +13,7 @@ module Git
         end
 
         # make sure bundle is fresh before each run
-        if File.exist?("Gemfile")
+        if !options[:no_bundle] && File.exist?("Gemfile")
           command = "(bundle check || (test -f vendor/cache && bundle --local --quiet) || bundle --quiet) && (#{command})"
         end
 
@@ -65,6 +65,7 @@ module Git
           opts.on("-v", "--version", "Show Version"){ puts "git-autobisect #{Version}"; exit }
           opts.on("-m", "--max N", Integer, "Inspect commits between HEAD..HEAD~<max>"){|max| options[:max] = max }
           opts.on("-s", "--start N", Integer, "Use N (instead of 1) as initial step and keep muliplying by 2"){|start| options[:start] = start }
+          opts.on("--no-bundle", "Do not bundle even if a Gemfile exists"){ options[:no_bundle] = true }
         end.parse!(argv)
         options
       end

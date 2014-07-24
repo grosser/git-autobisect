@@ -23,6 +23,7 @@ Usage
 
     -m, --max N                    Inspect commits between HEAD..HEAD~<max>
     -s, --start N                  Use N (instead of 1) as initial step and keep muliplying by 2
+    --no-bundle                    Do not bundle even if a Gemfile exists
 
 TIPS
 ====
