@@ -7,7 +7,15 @@ Find the first broken commit without having to learn git bisect.
 Install
 =======
 
-    gem install git-autobisect
+```Bash
+gem install git-autobisect
+```
+
+or as standalone binary (needs any ruby)
+
+```Bash
+curl https://rubinjam.herokuapp.com/pack/git-autobisect > git-autobisect && chmod +x git-autobisect
+```
 
 Usage
 =====
