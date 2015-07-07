@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    git-autobisect (0.3.1)
+    git-autobisect (0.4.0)
 
 GEM
   remote: https://rubygems.org/
@@ -30,3 +30,6 @@ DEPENDENCIES
   git-autobisect!
   rake
   rspec
+
+BUNDLED WITH
+   1.10.5

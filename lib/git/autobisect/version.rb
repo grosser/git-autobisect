@@ -1,5 +1,5 @@
 module Git
   module Autobisect
-    VERSION = Version = "0.3.1"
+    VERSION = Version = "0.4.0"
   end
 end
