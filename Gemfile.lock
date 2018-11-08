@@ -22,6 +22,8 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
+    rubinjam (0.6.0)
+      bundler
 
 PLATFORMS
   ruby
@@ -31,6 +33,7 @@ DEPENDENCIES
   git-autobisect!
   rake
   rspec
+  rubinjam
 
 BUNDLED WITH
    1.16.1
