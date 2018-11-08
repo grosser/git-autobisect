@@ -4,3 +4,4 @@ gemspec
 gem 'bump'
 gem 'rake'
 gem 'rspec'
+gem 'rubinjam'
