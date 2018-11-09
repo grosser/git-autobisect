@@ -35,7 +35,7 @@ describe "git-autobisect" do
 
   describe "basics" do
     it "shows its usage without arguments" do
-      autobisect("", :fail => true).should include("Usage")
+      autobisect("", fail: true).should include("Usage")
     end
 
     it "shows its usage with -h" do
@@ -67,11 +67,11 @@ describe "git-autobisect" do
     end
 
     it "stops when the first commit works" do
-      autobisect("'test 1'", :fail => true).should include("HEAD is not broken")
+      autobisect("'test 1'", fail: true).should include("HEAD is not broken")
     end
 
     it "stops when no commit works" do
-      autobisect("test", :fail => true).should include("No good commit found")
+      autobisect("test", fail: true).should include("No good commit found")
     end
 
     context "--max" do
@@ -86,7 +86,7 @@ describe "git-autobisect" do
       it "stops when no commit works inside of max range" do
         remove_a
         5.times{ add_irrelevant_commit }
-        autobisect(command, :fail => true).should include("No good commit found")
+        autobisect(command, fail: true).should include("No good commit found")
       end
     end
 
@@ -112,17 +112,18 @@ describe "git-autobisect" do
       before do
         write("Gemfile", "source 'https://rubygems.org'\ngem 'rake', '0.9.2'\nputs 123")
         write("test.rb", "gem 'rake', '0.9.2'\nputs 456")
+        run("bundle check || bundle")
       end
 
       it "bundles" do
-        result = autobisect("'bundle exec ruby test.rb'", :fail => true)
+        result = autobisect("'bundle exec ruby test.rb'", fail: true)
         result.should include("HEAD is not broken")
         [2,3].should include result.scan("123").count # fails on travis :/
         result.should include "bundle check"
       end
 
       it "does not bundle with --no-bundle" do
-        result = autobisect("'bundle exec ruby test.rb' --no-bundle", :fail => true)
+        result = autobisect("'bundle exec ruby test.rb' --no-bundle", fail: true)
         result.should include("HEAD is not broken")
         result.scan("123").count.should == 1
         result.should_not include "bundle check"
