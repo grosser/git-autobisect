@@ -8,7 +8,7 @@ task :default do
 end
 
 # update Readme.md to point to latest release
-(class << Bump::Bump;self;end).prepend(Module.new do
+(class << Bump::Bump;self;end).send(:prepend, Module.new do
   def run(*)
     result = super
 
@@ -41,15 +41,17 @@ task :upload_binary  do
   id = JSON.parse(reply).fetch("id") # fails when release already exists
 
   # upload binary
-  sh "rubinjam"
-  sh(
-    "curl",
-    "-X", "POST",
-    "--data-binary", "@git-autobisect",
-    "-H", "Content-Type: application/octet-stream",
-    *auth,
-    "https://uploads.github.com/repos/grosser/git-autobisect/releases/#{id}/assets?name=git-autobisect"
-  )
-ensure
-  sh "rm", "-f", "git-autobisect"
+  begin
+    sh "rubinjam"
+    sh(
+      "curl",
+      "-X", "POST",
+      "--data-binary", "@git-autobisect",
+      "-H", "Content-Type: application/octet-stream",
+      *auth,
+      "https://uploads.github.com/repos/grosser/git-autobisect/releases/#{id}/assets?name=git-autobisect"
+    )
+  ensure
+    sh "rm", "-f", "git-autobisect"
+  end
 end
