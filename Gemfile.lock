@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    git-autobisect (0.4.1)
+    git-autobisect (0.4.2)
 
 GEM
   remote: https://rubygems.org/
