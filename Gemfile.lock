@@ -22,7 +22,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
-    rubinjam (0.6.0)
+    rubinjam (0.7.0)
       bundler
 
 PLATFORMS
