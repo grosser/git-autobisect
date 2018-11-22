@@ -14,7 +14,7 @@ gem install git-autobisect
 or as standalone binary (needs any ruby)
 
 ```Bash
-curl -sL https://github.com/grosser/git-autobisect/releases/download/v0.4.2/git-autobisect > /usr/local/bin/git-autobisect && \
+curl -sL https://github.com/grosser/git-autobisect/releases/download/v0.4.3/git-autobisect > /usr/local/bin/git-autobisect && \
 chmod +x /usr/local/bin/git-autobisect && \
 git-autobisect --version
 ```
