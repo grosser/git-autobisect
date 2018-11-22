@@ -2,7 +2,7 @@ Find the first broken commit without having to learn git bisect.
 
  - automagically bundles if necessary
  - stops at first bad commit
- - takes binary steps (HEAD~1, HEAD~2, HEAD~4, HEAD~8)
+ - takes binary steps (`HEAD~1`, `HEAD~2`, `HEAD~4`, `HEAD~8`, ...)
 
 Install
 =======
