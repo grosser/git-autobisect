@@ -7,20 +7,6 @@ task :default do
   sh "rspec spec/"
 end
 
-# update Readme.md to point to latest release
-(class << Bump::Bump;self;end).send(:prepend, Module.new do
-  def run(*)
-    result = super
-
-    file = 'Readme.md'
-    content = File.read(file)
-    content.sub!(/releases\/download\/[^\/]+/, "releases/download/v#{Bump::Bump.current}") ||
-      abort("Readme change failed")
-    File.write(file, content)
-    system("git add #{file} && git commit --amend --no-edit") || abort("Unable to commit")
-
-    result
-  end
-end)
-
+# release a static binary and link it from the readme
 task release: 'rubinjam:upload_binary'
+Bump.replace_in_default = ["Readme.md"]
